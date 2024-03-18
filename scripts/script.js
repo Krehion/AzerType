@@ -1,26 +1,107 @@
-function choisirPhrasesOuMots() {
-    // Déclaration de la variable contenant le choix de l'utilisateur
-    let choix = prompt("Avec quelle liste désirez-vous jouer : 'mots' ou 'phrases' ?")
-    // Tant que l'utilisateur n'a pas saisi "mots" ou "phrases", on lui redemande de saisir un choix
-    while (choix !== "mots" && choix !== "phrases") {
-        choix = prompt("Vous devez choisir entre 'mots' et 'phrases'")
-    }
-    return choix
+/*********************************************************************************
+ * 
+ * Ce fichier contient toutes les fonctions nécessaires au fonctionnement du jeu. 
+ * 
+ *********************************************************************************/
+
+/**
+ * Cette fonction affiche dans la console le score de l'utilisateur
+ * @param {number} score : le score de l'utilisateur
+ * @param {number} nbMotsProposes : le nombre de mots proposés à l'utilisateur
+ */
+function afficherResultat(score, nbMotsProposes) {
+    // Récupération de la zone dans laquelle on va écrire le score
+    let spanScore = document.querySelector(".zoneScore span")
+    // Ecriture du texte
+    let affichageScore = `${score} / ${nbMotsProposes}` 
+    // On place le texte à l'intérieur du span. 
+    spanScore.innerText = affichageScore
 }
 
-function lancerBoucleDeJeu(listePropositions) {
+/**
+ * Cette fonction affiche une proposition, que le joueur devra recopier, 
+ * dans la zone "zoneProposition"
+ * @param {string} proposition : la proposition à afficher
+ */
+function afficherProposition(proposition) {
+    let zoneProposition = document.querySelector(".zoneProposition")
+    zoneProposition.innerText = proposition
+}
+
+/**
+ * Cette fonction construit et affiche l'email. 
+ * @param {string} nom : le nom du joueur
+ * @param {string} email : l'email de la personne avec qui il veut partager son score
+ * @param {string} score : le score. 
+ */
+function afficherEmail(nom, email, score) {
+    let mailto = `mailto:${email}?subject=Partage du score Azertype&body=Salut, c'est ${nom}. Je viens de réaliser le score ${score} sur le site d'AzerType !`
+    location.href = mailto
+}
+
+/**
+ * Cette fonction lance le jeu. 
+ * Elle demande à l'utilisateur de choisir entre "mots" et "phrases" et lance la boucle de jeu correspondante
+ */
+function lancerJeu() {
+    // Initialisations
+    initAddEventListenerPopup()
     let score = 0
-    for (let i = 0; i < listePropositions.length; i++) {
-        // On demande à l'utilisateur de saisir le mot correspondant à l'indice i
-        let motUtilisateur = prompt("Entrez le mot : " + listePropositions[i])
-        if (motUtilisateur === listePropositions[i]) {
-            // Si le mot saisi par l'utilisateur est correct, on incrémente le score
+    let i = 0
+    let listeProposition = listeMots
+
+    let btnValider = document.getElementById("btnValider")
+    let inputSaisie = document.getElementById("inputSaisie")
+
+    afficherProposition(listeProposition[i])
+
+    // Gestion de l'événement click sur le bouton "valider"
+    btnValider.addEventListener("click", () => {
+        if (inputSaisie.value === listeProposition[i]) {
             score++
         }
-    }
-    return score
-}
+        i++
+        afficherResultat(score, i)
+        inputSaisie.value = ''
+        if (listeProposition[i] === undefined) {
+            afficherProposition("Le jeu est fini")
+            btnValider.disabled = true
+        } else {
+            afficherProposition(listeProposition[i])
+        }
+    })
 
-function afficherResultat(score, nbMotsProposes) {
-    console.log("Votre score est de " + score + "/" + nbMotsProposes)
+    // Gestion de l'événement change sur les boutons radio
+    let listeBtnRadio = document.querySelectorAll(".optionSource input")
+    for (let index = 0; index < listeBtnRadio.length; index++) {
+        listeBtnRadio[index].addEventListener("change", (event) => {
+            // Si c'est le premier élément qui a été modifié, alors nous voulons
+            // jouer avec la listeMots. 
+            if (event.target.value === "1") {
+                listeProposition = listeMots
+            } else {
+                // Sinon nous voulons jouer avec la liste des phrases
+                listeProposition = listePhrases
+            }
+            // Et on modifie l'affichage en direct. 
+            afficherProposition(listeProposition[i])
+        })
+    }
+
+    // Gestion de l'envoi du formulaire de partage
+    let form = document.querySelector("form")
+    form.addEventListener("submit", (event) => {
+        event.preventDefault()
+        let baliseNom = document.getElementById("nom")
+        let nom = baliseNom.value
+
+        let baliseEmail = document.getElementById("email")
+        let email = baliseEmail.value
+
+        let scoreEmail = `${score} / ${i}`
+
+        afficherEmail(nom, email, scoreEmail)
+    })
+
+    afficherResultat(score, i)
 }
