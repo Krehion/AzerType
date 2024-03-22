@@ -70,7 +70,7 @@ function validerEmail(email) {
  * @param {string} message
  */
 function afficherMessageErreur(message) {
-  let spanErreurMessage = getElementById("erreurMessage"); // vérifie que l'élément n'existe pas déjà
+  let spanErreurMessage = document.getElementById("erreurMessage"); // vérifie que l'élément n'existe pas déjà
 
   if (!spanErreurMessage) {
     // s'il n'existe pas, on le crée
@@ -82,6 +82,7 @@ function afficherMessageErreur(message) {
   }
 
   spanErreurMessage.innerText = message;
+  console.log(message);
 }
 
 /**
